@@ -1,0 +1,691 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Oswald:wght@400;600&display=swap');
+
+/* =========================
+   BASE
+========================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+img { max-width: 100%; height: auto; }
+button { -webkit-tap-highlight-color: transparent; }
+
+/* =========================
+   OVERLAY
+========================= */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.48);
+  z-index: 1;
+}
+
+/* =========================
+   PAGE WRAP (tela 1)
+========================= */
+.page-wrap {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER — bonito do index.css
+========================= */
+.b-header {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 70px 50px 66px;
+  border-bottom: 1px solid rgba(220, 220, 220, 0.15);
+  background: rgba(5, 5, 5, 0.5);
+}
+
+.b-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  color: #e8e8e8;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.95);
+  margin-bottom: 8px;
+}
+
+.underline {
+  width: 72px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #aaaaaa, transparent);
+  margin: 0 auto 10px;
+}
+
+.deco {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #909090;
+  margin-bottom: 6px;
+}
+
+.deco::before,
+.deco::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: #888888;
+}
+
+.sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #666666;
+}
+
+/* =========================
+   BOTÃO LUXO
+========================= */
+.lux-btn {
+  position: relative;
+  margin-top: 20px;
+  padding: 14px 42px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #eaeaea;
+  background: transparent;
+  border: 1px solid rgba(200, 200, 200, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lux-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transition: left 0.7s ease;
+}
+
+.lux-btn:hover {
+  transform: translateY(-4px);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+.lux-btn:hover::before { left: 130%; }
+.lux-btn:active { transform: translateY(0); box-shadow: none; }
+
+/* =========================
+   ANIMAÇÃO
+========================= */
+.screen { animation: fadeIn 0.4s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   TELA 1 — BARBEIRO
+========================================= */
+.b-body {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  padding: 60px 20px 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.b-panel {
+  position: relative;
+  background: rgba(8, 8, 8, 0.75);
+  border: 1px solid rgba(180, 180, 180, 0.25);
+  border-radius: 4px;
+  padding: 48px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+}
+
+.b-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -150%;
+  width: 60%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-25deg);
+  transition: left 0.8s ease;
+}
+
+.b-panel:hover {
+  transform: translateY(-10px);
+  border-color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+  background: rgba(15, 15, 15, 0.85);
+}
+
+.b-panel:hover::before { left: 180%; }
+
+.b-photo {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #888;
+  margin-bottom: 28px;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.b-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.b-panel:hover .b-photo {
+  border-color: #ffffff;
+  box-shadow: 0 0 25px rgba(255,255,255,0.3);
+}
+
+.b-panel:hover .b-photo img { transform: scale(1.12); }
+
+.b-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: #e0e0e0;
+  margin-bottom: 22px;
+  transition: color 0.35s ease;
+}
+
+.b-panel:hover .b-name { color: #ffffff; }
+
+.b-tag {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #aaa;
+  border: 1px solid #888;
+  padding: 8px 28px;
+  transition: all 0.35s ease;
+}
+
+.b-panel:hover .b-tag {
+  color: #fff;
+  border-color: #fff;
+  background: rgba(255,255,255,0.08);
+  letter-spacing: 4px;
+}
+
+/* =========================================
+   TELA 2 — SERVIÇOS
+========================================= */
+#service-screen {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 60px;
+}
+
+#ss-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* card do barbeiro selecionado — do index.css */
+#ss-barber-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(180, 180, 180, 0.25);
+  border-radius: 14px;
+  padding: 26px 44px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  margin-top: 40px;
+}
+
+#ss-barber-top img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 15%;
+  border: 3px solid #aaa;
+}
+
+#ss-barber-top h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: #eee;
+  margin: 0;
+}
+
+#ss-divider {
+  width: 100%;
+  max-width: 600px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #aaa, transparent);
+  position: relative;
+  margin: 40px 0;
+}
+
+#ss-divider::after {
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  background: #aaa;
+  border-radius: 50%;
+}
+
+#ss-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.ss-service-card {
+  background: rgba(20, 20, 20, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.3s ease;
+  color: #e8e8e8;
+  padding: 0 0 16px;
+}
+
+.ss-service-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: #c8c8c8;
+  box-shadow: 0 0 30px rgba(200,200,200,0.2);
+}
+
+.ss-service-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  margin: 12px 14px 5px;
+  color: #e8e8e8;
+}
+
+.ss-service-price {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  color: #b0b0b0;
+  margin: 0 14px;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   TELA 3 — DIAS
+========================================= */
+.day-wrapper-card {
+  background: rgba(8, 8, 8, 0.90);
+  border: 2px solid rgba(180, 180, 180, 0.25);
+  border-radius: 16px;
+  padding: 36px 32px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.day-wrapper-card #ss-services-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.ss-service-card.day-item {
+  padding: 20px 16px !important;
+  text-align: center;
+  background: rgba(25, 25, 25, 0.85);
+}
+
+.ss-service-card.day-item .ss-service-name {
+  margin: 0;
+  font-size: 15px;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px;
+}
+
+.active-day {
+  background: linear-gradient(145deg, #d0d0d0, #909090) !important;
+  border: 2px solid #e8e8e8 !important;
+  box-shadow: 0 0 32px rgba(220,220,220,0.5) !important;
+  transform: scale(1.04) !important;
+}
+
+.active-day .ss-service-name {
+  color: #1a1210 !important;
+  font-weight: 700;
+}
+
+/* =========================================
+   TELA 4 — HORÁRIOS
+========================================= */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.time-slot {
+  background: rgba(25, 25, 25, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 18px 10px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #e8e8e8;
+  transition: 0.3s ease;
+}
+
+.time-slot:hover {
+  border-color: #c8c8c8;
+  box-shadow: 0 0 20px rgba(200,200,200,0.2);
+  transform: scale(1.04);
+}
+
+.time-selected {
+  background: linear-gradient(145deg, #d0d0d0, #909090) !important;
+  border: 2px solid #e8e8e8 !important;
+  color: #1a1210 !important;
+  font-weight: 700;
+  box-shadow: 0 0 28px rgba(220,220,220,0.5) !important;
+  transform: scale(1.05) !important;
+}
+
+.time-booked {
+  background: rgba(40, 10, 10, 0.7) !important;
+  border: 2px solid rgba(150, 50, 50, 0.4) !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.5;
+  transform: none !important;
+}
+
+.time-booked-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #884444;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.time-error {
+  background: rgba(120, 30, 30, 0.7);
+  border: 1px solid rgba(200, 80, 80, 0.5);
+  border-radius: 8px;
+  padding: 12px 20px;
+  color: #ffaaaa;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* =========================================
+   TELA 5 — CONFIRMAÇÃO
+========================================= */
+.confirm-card {
+  background: rgba(8, 8, 8, 0.90);
+  border: 2px solid rgba(180, 180, 180, 0.25);
+  border-radius: 16px;
+  padding: 36px 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.8);
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirm-barber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.confirm-barber-img {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 3px solid #b0b0b0 !important;
+}
+
+.confirm-barber-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #e8e8e8;
+}
+
+.confirm-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  margin: 20px 0;
+}
+
+.confirm-rows {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.confirm-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.confirm-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: #e8e8e8;
+  text-align: right;
+}
+
+.confirm-name-wrap {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirm-name-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.confirm-name-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(30, 30, 30, 0.9);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  color: #e8e8e8;
+  font-family: 'Oswald', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.confirm-name-input:focus {
+  border-color: #b0b0b0;
+  box-shadow: 0 0 12px rgba(180,180,180,0.2);
+}
+
+.input-error { border-color: #884444 !important; }
+
+.confirm-name-error {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  color: #ff8888;
+  letter-spacing: 1px;
+}
+
+.confirm-send-btn {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px 28px;
+  font-size: 14px;
+}
+
+/* =========================================
+   TELA 6 — SUCESSO
+========================================= */
+.success-card {
+  background: rgba(8, 8, 8, 0.90);
+  border: 2px solid rgba(180, 180, 180, 0.25);
+  border-radius: 16px;
+  padding: 48px 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.8);
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.success-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #b0b0b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #b0b0b0;
+  margin-bottom: 20px;
+}
+
+.success-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: #e8e8e8;
+  margin: 0 0 8px;
+}
+
+.success-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #888;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* =========================================
+   MOBILE (≤ 600px)
+========================================= */
+@media (max-width: 600px) {
+
+  .b-header { padding: 40px 20px 36px; }
+  .b-header h1 { font-size: 28px; }
+
+  .b-body {
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 60px;
+  }
+
+  .b-panel { padding: 32px 24px; width: 100%; }
+  .b-photo { width: 160px; height: 160px; }
+
+  .lux-btn { width: 100%; padding: 12px 20px; }
+
+  #ss-container { padding: 0 16px 60px; }
+
+  #ss-barber-top { padding: 20px 24px; margin-top: 24px; }
+  #ss-barber-top img { width: 100px; height: 100px; }
+
+  #ss-divider { margin: 28px 0; width: 80%; }
+
+  #ss-services-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ss-service-card > div:first-child {
+    height: clamp(180px, 55vw, 260px) !important;
+  }
+
+  .ss-service-name { font-size: 15px; }
+  .ss-service-price { font-size: 13px; }
+
+  .day-wrapper-card { padding: 20px 14px; }
+  .day-wrapper-card #ss-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .time-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .time-slot { font-size: 15px; padding: 14px 8px; }
+
+  .confirm-card, .success-card { padding: 28px 20px; }
+  .confirm-value { font-size: 14px; }
+}
