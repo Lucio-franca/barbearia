@@ -1,14 +1,13 @@
 import { barbers } from "../data/barbers";
 import type { Barber } from "../types";
 import bg from "../assets/backgrand.png";
+import { motion } from "motion/react";
 
-type Props = {
-  onSelect: (barber: Barber) => void;
-};
+type Props = { onSelect: (barber: Barber) => void };
 
 export default function BarberScreen({ onSelect }: Props) {
   return (
-    <div
+    <motion.div
       className="page-wrap"
       style={{
         backgroundImage: `url(${bg})`,
@@ -16,11 +15,13 @@ export default function BarberScreen({ onSelect }: Props) {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
+      initial={{ opacity: 0, x: 60 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -60 }}
+      transition={{ duration: 0.45, ease: "easeInOut" }}
     >
-      {/* Overlay escuro sobre o fundo para melhorar legibilidade */}
       <div className="overlay" />
 
-      {/* Cabeçalho da tela */}
       <div className="b-header">
         <h1>Agendamento</h1>
         <div className="underline" />
@@ -28,24 +29,25 @@ export default function BarberScreen({ onSelect }: Props) {
         <p className="sub">Clique na foto para agendar</p>
       </div>
 
-      {/* Grade de barbeiros — cada card chama onSelect ao clicar */}
       <div className="b-body">
-        {barbers.map((barber) => (
-          <div
+        {barbers.map((barber, i) => (
+          <motion.div
             key={barber.id}
             className="b-panel"
             onClick={() => onSelect(barber)}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.15, duration: 0.5, ease: "easeOut" }}
+            whileTap={{ scale: 0.97 }}
           >
-            {/* Foto circular do barbeiro */}
             <div className="b-photo">
               <img src={barber.image} alt={barber.name} />
             </div>
-
             <p className="b-name">{barber.name}</p>
             <span className="b-tag">Agendar agora</span>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,85 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import bg from "../assets/backgrand.png";
+import { createClient } from "@supabase/supabase-js";
+import { motion } from "motion/react";
 
-type Props = {
-  onBack: () => void;
-  onSelect: (time: string) => void;
-  selectedDate: string; // data selecionada para montar a chave do array
-};
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
-// =============================================
-// HORÁRIOS DISPONÍVEIS DA BARBEARIA
-// Edite aqui para mudar os horários do dia
-// =============================================
+type Props = { onBack: () => void; onSelect: (time: string) => void; selectedDate: string };
+
 const ALL_TIMES = [
-  "09:00", "09:30", "10:00", "10:30",
-  "11:00", "11:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30",
-  "17:00", "17:30", "18:00", "18:30",
-  "19:00", "19:30", "20:00",
+  "09:00","09:30","10:00","10:30",
+  "11:00","11:30","14:00","14:30",
+  "15:00","15:30","16:00","16:30",
+  "17:00","17:30","18:00","18:30",
+  "19:00","19:30","20:00",
 ];
 
-// =============================================
-// HORÁRIOS OCUPADOS — array em memória
-// Reseta automaticamente quando a semana muda
-// Formato da chave: "YYYY-MM-DD|HH:MM"
-// =============================================
-const getWeekKey = () => {
-  const now = new Date();
-  // pega o número da semana do ano para detectar virada de semana
-  const start = new Date(now.getFullYear(), 0, 1);
-  const week = Math.floor(
-    (now.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)
-  );
-  return `${now.getFullYear()}-W${week}`;
-};
+export async function bookSlot(dateISO: string, time: string, cliente: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("agendamentos")
+    .insert({ data: dateISO.slice(0, 10), horario: time, cliente })
+    .select("token")
+    .single();
 
-// chave da semana atual salva junto para detectar virada
-const STORAGE_KEY = "barber_booked";
-const stored = sessionStorage.getItem(STORAGE_KEY);
-let bookedData: { week: string; slots: string[] } = stored
-  ? JSON.parse(stored)
-  : { week: getWeekKey(), slots: [] };
-
-// se virou a semana, reseta tudo
-if (bookedData.week !== getWeekKey()) {
-  bookedData = { week: getWeekKey(), slots: [] };
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(bookedData));
-}
-
-// função para bloquear um horário (chamada após confirmação)
-export function bookSlot(dateISO: string, time: string) {
-  const key = `${dateISO.slice(0, 10)}|${time}`;
-  if (!bookedData.slots.includes(key)) {
-    bookedData.slots.push(key);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(bookedData));
-  }
-}
-
-// função para checar se está ocupado
-export function isSlotBooked(dateISO: string, time: string): boolean {
-  const key = `${dateISO.slice(0, 10)}|${time}`;
-  return bookedData.slots.includes(key);
+  if (error || !data) throw new Error("Erro ao agendar");
+  return data.token;
 }
 
 export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [shakeInput, setShakeInput] = useState(false);
+
+  useEffect(() => {
+    async function fetchBooked() {
+      setLoading(true);
+      const { data } = await supabase
+        .from("agendamentos")
+        .select("horario")
+        .eq("data", selectedDate.slice(0, 10))
+        .eq("cancelado", false);
+      setBookedSlots((data ?? []).map((r) => r.horario.slice(0, 5)));
+      setLoading(false);
+    }
+    fetchBooked();
+  }, [selectedDate]);
 
   function handleSelect(time: string) {
-    // verifica se o horário já está ocupado
-    if (isSlotBooked(selectedDate, time)) {
+    if (bookedSlots.includes(time)) {
       setErrorMsg(`O horário ${time} já está reservado. Escolha outro.`);
+      setShakeInput(true);
+      setTimeout(() => setShakeInput(false), 500);
       setSelectedTime(null);
       return;
     }
     setErrorMsg(null);
-    // se clicar no mesmo, desmarca
     setSelectedTime(selectedTime === time ? null : time);
   }
 
   return (
-    <div
+    <motion.div
       id="service-screen"
       style={{
         backgroundImage: `url(${bg})`,
@@ -89,10 +73,13 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
         minHeight: "100vh",
         position: "relative",
       }}
+      initial={{ opacity: 0, x: 60 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -60 }}
+      transition={{ duration: 0.45, ease: "easeInOut" }}
     >
       <div className="overlay" />
 
-      {/* Cabeçalho padrão */}
       <div className="b-header">
         <h1>Agendamento</h1>
         <div className="underline" />
@@ -100,59 +87,73 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
       </div>
 
       <div id="ss-container">
-
-        {/* Topo com botão voltar */}
         <div id="ss-barber-top">
           <h2>Selecione o horário</h2>
-          <button className="lux-btn" onClick={onBack}>Voltar</button>
+          <motion.button className="lux-btn" onClick={onBack} whileTap={{ scale: 0.94 }}>
+            Voltar
+          </motion.button>
         </div>
 
-        <div id="ss-divider" />
+        <motion.div
+          id="ss-divider"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          style={{ transformOrigin: "center" }}
+        />
 
-        {/* Mensagem de erro se horário ocupado */}
         {errorMsg && (
-          <div className="time-error">
+          <motion.div
+            className="time-error"
+            animate={shakeInput ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}}
+            transition={{ duration: 0.4 }}
+          >
             ⚠️ {errorMsg}
-          </div>
+          </motion.div>
         )}
 
-        {/* Grade de horários dentro do card preto */}
         <div className="day-wrapper-card">
-          <div className="time-grid">
-            {ALL_TIMES.map((time) => {
-              const booked = isSlotBooked(selectedDate, time);
-              return (
-                <div
-                  key={time}
-                  onClick={() => handleSelect(time)}
-                  className={`time-slot ${
-                    booked
-                      ? "time-booked"          // ocupado — cinza bloqueado
-                      : selectedTime === time
-                      ? "time-selected"        // selecionado pelo usuário
-                      : ""                     // disponível
-                  }`}
-                >
-                  {time}
-                  {booked && <span className="time-booked-label">Ocupado</span>}
-                </div>
-              );
-            })}
-          </div>
+          {loading ? (
+            <p style={{ textAlign: "center", padding: 24, color: "#aaa" }}>
+              Carregando horários...
+            </p>
+          ) : (
+            <div className="time-grid">
+              {ALL_TIMES.map((time, i) => {
+                const booked = bookedSlots.includes(time);
+                return (
+                  <motion.div
+                    key={time}
+                    onClick={() => handleSelect(time)}
+                    className={`time-slot ${booked ? "time-booked" : selectedTime === time ? "time-selected" : ""}`}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.04, duration: 0.35, ease: "easeOut" }}
+                    whileTap={!booked ? { scale: 0.93 } : {}}
+                  >
+                    {time}
+                    {booked && <span className="time-booked-label">Ocupado</span>}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Botão continuar — só aparece com horário selecionado */}
         {selectedTime && (
-          <button
+          <motion.button
             className="lux-btn"
             style={{ marginTop: 32 }}
             onClick={() => onSelect(selectedTime)}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.3 }}
           >
             Continuar
-          </button>
+          </motion.button>
         )}
-
       </div>
-    </div>
+    </motion.div>
   );
 }
