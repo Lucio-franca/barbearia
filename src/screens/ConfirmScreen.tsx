@@ -34,7 +34,14 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
     setLoading(true);
 
     try {
-      const token = await bookSlot(date, time, clientName);
+   const token = await bookSlot(
+  date,
+  time,
+  clientName,
+  String(barber.id),
+  String(service.id),
+  service.price
+);
       
       if (!token) {
         alert("Erro ao criar agendamento. Tente novamente.");

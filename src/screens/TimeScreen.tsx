@@ -18,13 +18,27 @@ const ALL_TIMES = [
   "19:00","19:30","20:00",
 ];
 
-export async function bookSlot(dateISO: string, time: string, cliente: string): Promise<string> {
+export async function bookSlot(
+  dateISO: string,
+  time: string,
+  cliente: string,
+  barbeiroId?: string,
+  servicoId?: string,
+  servicoValor?: number
+): Promise<string> {
   const dateOnly = dateISO.slice(0, 10);
 
   try {
     const { data, error } = await supabase
       .from("agendamentos")
-      .insert([{ data: dateOnly, horario: time, cliente }])
+      .insert([{
+        data: dateOnly,
+        horario: time,
+        cliente,
+        barbeiro_id: barbeiroId,
+        servico_id: servicoId,
+        servico_valor: servicoValor,
+      }])
       .select("token")
       .single();
 
