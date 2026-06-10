@@ -38,7 +38,7 @@ export default function CancelScreen() {
         .from("agendamentos")
         .select("*")
         .eq("token", token)
-        .single();
+        .maybeSingle();
 
       if (!data) {
         setStatus("notfound");
@@ -56,7 +56,7 @@ export default function CancelScreen() {
           .from("barbeiros")
           .select("nome")
           .eq("id", data.barbeiro_id)
-          .single();
+          .maybeSingle();
         if (barberData) setBarberName(barberData.nome);
       }
 
@@ -65,7 +65,7 @@ export default function CancelScreen() {
           .from("servicos")
           .select("nome")
           .eq("id", data.servico_id)
-          .single();
+          .maybeSingle();
         if (serviceData) setServiceName(serviceData.nome);
       }
 
@@ -144,14 +144,12 @@ export default function CancelScreen() {
           style={{ marginTop: 40 }}
         >
 
-          {/* CARREGANDO */}
           {status === "loading" && (
             <p style={{ color: "#aaa", fontFamily: "Oswald", letterSpacing: 2, fontSize: 14, textAlign: "center" }}>
               Carregando...
             </p>
           )}
 
-          {/* NÃO ENCONTRADO */}
           {status === "notfound" && (
             <>
               <div className="success-icon" style={{ borderColor: "#884444", color: "#884444" }}>✕</div>
@@ -168,7 +166,6 @@ export default function CancelScreen() {
             </>
           )}
 
-          {/* JÁ CANCELADO */}
           {status === "already" && (
             <>
               <div className="success-icon" style={{ borderColor: "#888", color: "#888" }}>✕</div>
@@ -185,7 +182,6 @@ export default function CancelScreen() {
             </>
           )}
 
-          {/* ERRO */}
           {status === "error" && (
             <>
               <div className="success-icon" style={{ borderColor: "#884444", color: "#884444" }}>!</div>
@@ -202,7 +198,6 @@ export default function CancelScreen() {
             </>
           )}
 
-          {/* CANCELADO COM SUCESSO */}
           {status === "cancelled" && (
             <>
               <motion.div
@@ -234,7 +229,6 @@ export default function CancelScreen() {
             </>
           )}
 
-          {/* ENCONTRADO — mostra detalhes e botão cancelar */}
           {status === "found" && agendamento && (
             <>
               <div style={{ textAlign: "center", marginBottom: 16 }}>
