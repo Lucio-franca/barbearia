@@ -38,9 +38,9 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
     try {
       console.log("=== TENTANDO CONFIRMAR AGENDAMENTO ===");
       console.log("Cliente:", clientName);
-      console.log("Barbeiro:", barber.name);
-      console.log("Serviço:", service.name);
-      console.log("Data:", date);
+      console.log("Barbeiro:", barber.name, "ID:", barber.id);
+      console.log("Serviço:", service.name, "ID:", service.id);
+      console.log("Data (raw):", date);
       console.log("Horário:", time);
 
       const token = await bookSlot(
@@ -94,7 +94,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
       console.error("❌ ERRO AO CONFIRMAR:", error);
       console.error("Mensagem:", errorMsg);
       
-      setConfirmError(`Erro ao criar agendamento: ${errorMsg}`);
+      setConfirmError(`Erro: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
