@@ -54,6 +54,10 @@ export default function CancelScreen() {
     setStatus("cancelled");
   }
 
+  function goHome() {
+    window.location.href = window.location.origin;
+  }
+
   const dateFormatted = agendamento
     ? new Date(agendamento.data + "T12:00:00").toLocaleDateString("pt-BR", {
         weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
@@ -101,6 +105,14 @@ export default function CancelScreen() {
               <div className="success-icon" style={{ borderColor: "#884444", color: "#884444" }}>✕</div>
               <h2 className="success-title" style={{ color: "#ff8888" }}>Link inválido</h2>
               <p className="success-sub">Este link de cancelamento não foi encontrado.</p>
+              <motion.button
+                className="lux-btn"
+                style={{ marginTop: 32 }}
+                onClick={goHome}
+                whileTap={{ scale: 0.94 }}
+              >
+                Voltar ao início
+              </motion.button>
             </>
           )}
 
@@ -110,6 +122,14 @@ export default function CancelScreen() {
               <div className="success-icon" style={{ borderColor: "#888", color: "#888" }}>✕</div>
               <h2 className="success-title" style={{ color: "#aaa" }}>Já cancelado</h2>
               <p className="success-sub">Este agendamento já foi cancelado anteriormente.</p>
+              <motion.button
+                className="lux-btn"
+                style={{ marginTop: 32 }}
+                onClick={goHome}
+                whileTap={{ scale: 0.94 }}
+              >
+                Voltar ao início
+              </motion.button>
             </>
           )}
 
@@ -119,6 +139,14 @@ export default function CancelScreen() {
               <div className="success-icon" style={{ borderColor: "#884444", color: "#884444" }}>!</div>
               <h2 className="success-title" style={{ color: "#ff8888" }}>Erro</h2>
               <p className="success-sub">Não foi possível cancelar. Tente novamente.</p>
+              <motion.button
+                className="lux-btn"
+                style={{ marginTop: 32 }}
+                onClick={goHome}
+                whileTap={{ scale: 0.94 }}
+              >
+                Voltar ao início
+              </motion.button>
             </>
           )}
 
@@ -143,6 +171,14 @@ export default function CancelScreen() {
               }}>
                 O horário foi liberado para outros clientes.
               </p>
+              <motion.button
+                className="lux-btn"
+                style={{ marginTop: 32 }}
+                onClick={goHome}
+                whileTap={{ scale: 0.94 }}
+              >
+                Voltar ao início
+              </motion.button>
             </>
           )}
 
@@ -184,6 +220,15 @@ export default function CancelScreen() {
                 style={{ borderColor: "rgba(200,80,80,0.6)", color: "#ff9999" }}
               >
                 ❌ Confirmar cancelamento
+              </motion.button>
+
+              <motion.button
+                className="lux-btn"
+                style={{ marginTop: 12 }}
+                onClick={goHome}
+                whileTap={{ scale: 0.94 }}
+              >
+                Voltar ao início
               </motion.button>
             </>
           )}
