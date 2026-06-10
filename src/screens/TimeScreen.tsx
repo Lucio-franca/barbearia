@@ -25,7 +25,19 @@ export async function bookSlot(dateISO: string, time: string, cliente: string): 
     .select("token")
     .single();
 
-  if (error || !data) throw new Error("Erro ao agendar");
+  if (error) {
+    if (error.code === "23505") {
+      const { data: existing } = await supabase
+        .from("agendamentos")
+        .select("token")
+        .eq("data", dateISO.slice(0, 10))
+        .eq("horario", time)
+        .single();
+      if (existing) return existing.token;
+    }
+    throw new Error("Erro ao agendar");
+  }
+
   return data.token;
 }
 
