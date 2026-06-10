@@ -15,6 +15,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
   const [clientName, setClientName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [shake, setShake] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const dateFormatted = new Date(date).toLocaleDateString("pt-BR", {
     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
@@ -30,34 +31,49 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
       return;
     }
     setNameError(false);
+    setLoading(true);
 
-    const token = await bookSlot(date, time, clientName);
-    const cancelLink = `${window.location.origin}?token=${token}`;
+    try {
+      const token = await bookSlot(date, time, clientName);
+      
+      if (!token) {
+        alert("Erro ao criar agendamento. Tente novamente.");
+        setLoading(false);
+        return;
+      }
 
-    const msg = [
-      `🗓️ *NOVO AGENDAMENTO*`,
-      ``,
-      `👤 *Cliente:* ${clientName}`,
-      ``,
-      `📅 *Data:* ${dateFormatted}`,
-      `🕐 *Horário:* ${time}`,
-      ``,
-      `💈 *Profissional:* ${barber.name}`,
-      ``,
-      `✂️ *Serviço:* ${service.name}`,
-      `💰 *Valor:* ${priceFormatted}`,
-      ``,
-      `〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️`,
-      ``,
-      `⚠️ Para cancelar seu agendamento acesse o link abaixo:`,
-      ``,
-      cancelLink,
-      ``,
-      `_Agendamento realizado pelo site._`,
-    ].join("\n");
+      const cancelLink = `${window.location.origin}?token=${token}`;
 
-    window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
-    onConfirm(clientName);
+      const msg = [
+        `🗓️ *NOVO AGENDAMENTO*`,
+        ``,
+        `👤 *Cliente:* ${clientName}`,
+        ``,
+        `📅 *Data:* ${dateFormatted}`,
+        `🕐 *Horário:* ${time}`,
+        ``,
+        `💈 *Profissional:* ${barber.name}`,
+        ``,
+        `✂️ *Serviço:* ${service.name}`,
+        `💰 *Valor:* ${priceFormatted}`,
+        ``,
+        `〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️`,
+        ``,
+        `⚠️ Para cancelar seu agendamento acesse o link abaixo:`,
+        ``,
+        cancelLink,
+        ``,
+        `_Agendamento realizado pelo site._`,
+      ].join("\n");
+
+      window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
+      onConfirm(clientName);
+    } catch (error) {
+      console.error("Erro ao confirmar:", error);
+      alert("Erro ao criar agendamento. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -87,7 +103,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
       <div id="ss-container">
         <div id="ss-barber-top">
           <h2>Resumo</h2>
-          <motion.button className="lux-btn" onClick={onBack} whileTap={{ scale: 0.94 }}>
+          <motion.button className="lux-btn" onClick={onBack} whileTap={{ scale: 0.94 }} disabled={loading}>
             Voltar
           </motion.button>
         </div>
@@ -152,6 +168,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
               className={`confirm-name-input ${nameError ? "input-error" : ""}`}
               animate={shake ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}}
               transition={{ duration: 0.4 }}
+              disabled={loading}
             />
             {nameError && (
               <motion.span
@@ -169,8 +186,10 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
             className="lux-btn confirm-send-btn"
             onClick={handleConfirm}
             whileTap={{ scale: 0.96 }}
+            disabled={loading}
+            style={{ opacity: loading ? 0.6 : 1 }}
           >
-            📲 Confirmar e enviar no WhatsApp
+            {loading ? "Carregando..." : "📲 Confirmar e enviar no WhatsApp"}
           </motion.button>
         </motion.div>
       </div>

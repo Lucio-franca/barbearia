@@ -19,26 +19,29 @@ const ALL_TIMES = [
 ];
 
 export async function bookSlot(dateISO: string, time: string, cliente: string): Promise<string> {
-  const { data, error } = await supabase
-    .from("agendamentos")
-    .insert({ data: dateISO.slice(0, 10), horario: time, cliente })
-    .select("token")
-    .single();
+  const dateOnly = dateISO.slice(0, 10);
 
-  if (error) {
-    if (error.code === "23505") {
-      const { data: existing } = await supabase
-        .from("agendamentos")
-        .select("token")
-        .eq("data", dateISO.slice(0, 10))
-        .eq("horario", time)
-        .single();
-      if (existing) return existing.token;
+  try {
+    const { data, error } = await supabase
+      .from("agendamentos")
+      .insert([{ data: dateOnly, horario: time, cliente }])
+      .select("token")
+      .single();
+
+    if (error) {
+      console.error("Erro ao agendar:", error);
+      throw error;
     }
-    throw new Error("Erro ao agendar");
-  }
 
-  return data.token;
+    if (!data || !data.token) {
+      throw new Error("Token não retornado");
+    }
+
+    return data.token;
+  } catch (err) {
+    console.error("bookSlot error:", err);
+    throw err;
+  }
 }
 
 export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
@@ -50,14 +53,28 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
 
   useEffect(() => {
     async function fetchBooked() {
-      setLoading(true);
-      const { data } = await supabase
-        .from("agendamentos")
-        .select("horario")
-        .eq("data", selectedDate.slice(0, 10))
-        .eq("cancelado", false);
-      setBookedSlots((data ?? []).map((r) => r.horario.slice(0, 5)));
-      setLoading(false);
+      try {
+        setLoading(true);
+        const dateOnly = selectedDate.slice(0, 10);
+        const { data, error } = await supabase
+          .from("agendamentos")
+          .select("horario")
+          .eq("data", dateOnly)
+          .eq("cancelado", false);
+
+        if (error) {
+          console.error("Erro ao buscar horários:", error);
+          setErrorMsg("Erro ao carregar horários");
+          return;
+        }
+
+        setBookedSlots((data ?? []).map((r) => r.horario.slice(0, 5)));
+      } catch (err) {
+        console.error("fetchBooked error:", err);
+        setErrorMsg("Erro ao carregar horários");
+      } finally {
+        setLoading(false);
+      }
     }
     fetchBooked();
   }, [selectedDate]);
