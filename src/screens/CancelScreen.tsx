@@ -24,77 +24,151 @@ export default function CancelScreen() {
   const [barberName, setBarberName] = useState<string>("");
   const [serviceName, setServiceName] = useState<string>("");
   const [status, setStatus] = useState<"loading" | "found" | "notfound" | "cancelled" | "already" | "error">("loading");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   const token = new URLSearchParams(window.location.search).get("token");
 
   useEffect(() => {
     async function fetchAgendamento() {
+      console.log("=== BUSCANDO AGENDAMENTO ===");
+      console.log("Token:", token);
+
       if (!token) {
+        console.error("❌ Token não encontrado na URL");
         setStatus("notfound");
         return;
       }
 
-      const { data } = await supabase
-        .from("agendamentos")
-        .select("*")
-        .eq("token", token)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from("agendamentos")
+          .select("*")
+          .eq("token", token)
+          .maybeSingle();
 
-      if (!data) {
+        console.log("Resposta da busca:", { data, error });
+
+        if (error) {
+          console.error("❌ ERRO ao buscar agendamento:", error);
+          setStatus("notfound");
+          return;
+        }
+
+        if (!data) {
+          console.error("❌ Nenhum agendamento encontrado com este token");
+          setStatus("notfound");
+          return;
+        }
+
+        console.log("✅ Agendamento encontrado:", data);
+
+        if (data.cancelado) {
+          console.log("Agendamento já está cancelado");
+          setStatus("already");
+          return;
+        }
+
+        setAgendamento(data);
+
+        if (data.barbeiro_id) {
+          console.log("Buscando barbeiro ID:", data.barbeiro_id);
+          const { data: barberData, error: barberError } = await supabase
+            .from("barbeiros")
+            .select("nome")
+            .eq("id", data.barbeiro_id)
+            .maybeSingle();
+          
+          if (barberError) {
+            console.error("Erro ao buscar barbeiro:", barberError);
+          } else if (barberData) {
+            console.log("Barbeiro encontrado:", barberData.nome);
+            setBarberName(barberData.nome);
+          }
+        }
+
+        if (data.servico_id) {
+          console.log("Buscando serviço ID:", data.servico_id);
+          const { data: serviceData, error: serviceError } = await supabase
+            .from("servicos")
+            .select("nome")
+            .eq("id", data.servico_id)
+            .maybeSingle();
+          
+          if (serviceError) {
+            console.error("Erro ao buscar serviço:", serviceError);
+          } else if (serviceData) {
+            console.log("Serviço encontrado:", serviceData.nome);
+            setServiceName(serviceData.nome);
+          }
+        }
+
+        setStatus("found");
+      } catch (err) {
+        console.error("❌ ERRO GERAL ao buscar:", err);
         setStatus("notfound");
-        return;
       }
-      if (data.cancelado) {
-        setStatus("already");
-        return;
-      }
-
-      setAgendamento(data);
-
-      if (data.barbeiro_id) {
-        const { data: barberData } = await supabase
-          .from("barbeiros")
-          .select("nome")
-          .eq("id", data.barbeiro_id)
-          .maybeSingle();
-        if (barberData) setBarberName(barberData.nome);
-      }
-
-      if (data.servico_id) {
-        const { data: serviceData } = await supabase
-          .from("servicos")
-          .select("nome")
-          .eq("id", data.servico_id)
-          .maybeSingle();
-        if (serviceData) setServiceName(serviceData.nome);
-      }
-
-      setStatus("found");
     }
     fetchAgendamento();
   }, [token]);
 
   async function handleCancel() {
-    if (!agendamento) return;
+    if (!agendamento) {
+      console.error("❌ Agendamento não encontrado no state");
+      alert("Erro: Agendamento não encontrado");
+      return;
+    }
+
     setStatus("loading");
 
+    console.log("=== INICIANDO CANCELAMENTO ===");
+    console.log("ID do agendamento:", agendamento.id);
+    console.log("Cliente:", agendamento.cliente);
+    console.log("Data:", agendamento.data);
+    console.log("Horário:", agendamento.horario);
+
     try {
+      console.log("Enviando UPDATE para Supabase...");
+
       const { data, error } = await supabase
         .from("agendamentos")
         .update({ cancelado: true })
         .eq("id", agendamento.id)
         .select();
 
+      console.log("Resposta do Supabase:", { data, error });
+
       if (error) {
-        console.error("Erro ao cancelar:", error);
+        const errorMsg = `Código: ${error.code} | Mensagem: ${error.message} | Detalhes: ${error.details || "N/A"}`;
+        console.error("❌ ERRO AO CANCELAR:", error);
+        console.error("Detalhes completos:", errorMsg);
+
+        setErrorDetail(errorMsg);
+        alert(`Erro ao cancelar:\n\nCódigo: ${error.code}\nMensagem: ${error.message}`);
         setStatus("error");
         return;
       }
 
-      console.log("Agendamento cancelado com sucesso:", data);
+      if (!data || data.length === 0) {
+        const errorMsg = "Nenhum dado retornado do UPDATE";
+        console.error("❌ ERRO:", errorMsg);
+        setErrorDetail(errorMsg);
+        alert("Erro: Nenhum dado retornado do servidor");
+        setStatus("error");
+        return;
+      }
+
+      console.log("✅ SUCESSO! Agendamento cancelado:", data);
+      alert("✅ Agendamento cancelado com sucesso!");
       setStatus("cancelled");
     } catch (err) {
-      console.error("Erro geral:", err);
+      const errorStack = err instanceof Error ? err.stack : "N/A";
+      const errorMessage = err instanceof Error ? err.message : String(err);
+
+      console.error("❌ ERRO GERAL:", err);
+      console.error("Stack:", errorStack);
+
+      setErrorDetail(errorMessage);
+      alert(`Erro geral:\n\n${errorMessage}`);
       setStatus("error");
     }
   }
@@ -187,6 +261,27 @@ export default function CancelScreen() {
               <div className="success-icon" style={{ borderColor: "#884444", color: "#884444" }}>!</div>
               <h2 className="success-title" style={{ color: "#ff8888" }}>Erro</h2>
               <p className="success-sub">Não foi possível cancelar. Tente novamente.</p>
+              {errorDetail && (
+                <div style={{
+                  backgroundColor: "rgba(255, 80, 80, 0.1)",
+                  border: "1px solid #884444",
+                  borderRadius: 8,
+                  padding: 12,
+                  marginTop: 16,
+                  marginBottom: 16,
+                }}>
+                  <p style={{
+                    fontFamily: "monospace",
+                    fontSize: 11,
+                    color: "#ff9999",
+                    margin: 0,
+                    wordBreak: "break-all",
+                    lineHeight: 1.6,
+                  }}>
+                    {errorDetail}
+                  </p>
+                </div>
+              )}
               <motion.button
                 className="lux-btn"
                 style={{ marginTop: 32 }}
