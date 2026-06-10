@@ -26,7 +26,6 @@ export async function bookSlot(
   servicoId?: string,
   servicoValor?: number
 ): Promise<string> {
-  // Garantir que a data está correta
   let dateOnly = dateISO;
   
   if (dateISO.includes("T")) {
@@ -36,31 +35,9 @@ export async function bookSlot(
   }
 
   console.log("=== BOOK SLOT ===");
-  console.log("Data processada:", dateOnly);
-  console.log("Horário:", time);
-  console.log("Cliente:", cliente);
+  console.log("Data:", dateOnly, "Horário:", time, "Cliente:", cliente);
 
   try {
-    // Verificar se já existe
-    const { data: existing, error: existingError } = await supabase
-      .from("agendamentos")
-      .select("token")
-      .eq("data", dateOnly)
-      .eq("horario", time)
-      .eq("cancelado", false)
-      .maybeSingle();
-
-    if (existingError) {
-      console.error("Erro ao verificar duplicata:", existingError);
-    }
-
-    if (existing) {
-      console.log("Horário já agendado:", existing.token);
-      return existing.token;
-    }
-
-    // Inserir novo
-    console.log("Inserindo novo agendamento...");
     const { data, error } = await supabase
       .from("agendamentos")
       .insert([{
@@ -70,26 +47,29 @@ export async function bookSlot(
         barbeiro_id: barbeiroId,
         servico_id: servicoId,
         servico_valor: servicoValor,
+        cancelado: false,
       }])
       .select("token")
       .single();
 
     if (error) {
-      console.error("❌ Erro ao agendar:", error);
-      console.error("Código:", error.code);
-      console.error("Mensagem:", error.message);
-      console.error("Detalhes:", error.details);
+      console.error("❌ Erro INSERT:", error.code, error.message);
+      
+      if (error.code === "23505") {
+        throw new Error("Este horário já foi reservado. Por favor, escolha outro horário.");
+      }
+      
       throw new Error(`${error.code}: ${error.message}`);
     }
 
     if (!data || !data.token) {
-      throw new Error("Token não retornado do servidor");
+      throw new Error("Nenhum token retornado");
     }
 
-    console.log("✅ Sucesso! Token:", data.token);
+    console.log("✅ Agendamento criado! Token:", data.token);
     return data.token;
   } catch (err) {
-    console.error("❌ bookSlot error:", err);
+    console.error("bookSlot error:", err);
     throw err;
   }
 }
@@ -113,8 +93,6 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
           dateOnly = selectedDate.slice(0, 10);
         }
 
-        console.log("Buscando horários para data:", dateOnly);
-
         const { data, error } = await supabase
           .from("agendamentos")
           .select("horario")
@@ -122,13 +100,13 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
           .eq("cancelado", false);
 
         if (error) {
-          console.error("Erro ao buscar horários:", error);
+          console.error("Erro ao buscar:", error);
           setErrorMsg("Erro ao carregar horários");
           return;
         }
 
         const booked = (data ?? []).map((r) => r.horario.slice(0, 5));
-        console.log("Horários ocupados:", booked);
+        console.log("Horários booked:", booked);
         setBookedSlots(booked);
       } catch (err) {
         console.error("fetchBooked error:", err);
@@ -142,7 +120,7 @@ export default function TimeScreen({ onBack, onSelect, selectedDate }: Props) {
 
   function handleSelect(time: string) {
     if (bookedSlots.includes(time)) {
-      setErrorMsg(`O horário ${time} já está reservado. Escolha outro.`);
+      setErrorMsg(`Horário ${time} já reservado. Escolha outro.`);
       setShakeInput(true);
       setTimeout(() => setShakeInput(false), 500);
       setSelectedTime(null);
