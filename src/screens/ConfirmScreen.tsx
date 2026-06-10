@@ -16,6 +16,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
   const [nameError, setNameError] = useState(false);
   const [shake, setShake] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   const dateFormatted = new Date(date).toLocaleDateString("pt-BR", {
     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
@@ -31,20 +32,32 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
       return;
     }
     setNameError(false);
+    setConfirmError(null);
     setLoading(true);
 
     try {
-   const token = await bookSlot(
-  date,
-  time,
-  clientName,
-  String(barber.id),
-  String(service.id),
-  service.price
-);
+      console.log("=== TENTANDO CONFIRMAR AGENDAMENTO ===");
+      console.log("Cliente:", clientName);
+      console.log("Barbeiro:", barber.name);
+      console.log("Serviço:", service.name);
+      console.log("Data:", date);
+      console.log("Horário:", time);
+
+      const token = await bookSlot(
+        date,
+        time,
+        clientName,
+        String(barber.id),
+        String(service.id),
+        service.price
+      );
       
+      console.log("✅ Agendamento criado com sucesso! Token:", token);
+
       if (!token) {
-        alert("Erro ao criar agendamento. Tente novamente.");
+        const errorMsg = "Erro ao criar agendamento. Tente novamente.";
+        console.error("❌", errorMsg);
+        setConfirmError(errorMsg);
         setLoading(false);
         return;
       }
@@ -73,11 +86,15 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
         `_Agendamento realizado pelo site._`,
       ].join("\n");
 
+      console.log("Abrindo WhatsApp com mensagem...");
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
       onConfirm(clientName);
     } catch (error) {
-      console.error("Erro ao confirmar:", error);
-      alert("Erro ao criar agendamento. Tente novamente.");
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error("❌ ERRO AO CONFIRMAR:", error);
+      console.error("Mensagem:", errorMsg);
+      
+      setConfirmError(`Erro ao criar agendamento: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -122,6 +139,31 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           style={{ transformOrigin: "center" }}
         />
+
+        {confirmError && (
+          <motion.div
+            style={{
+              backgroundColor: "rgba(255, 80, 80, 0.1)",
+              border: "1px solid #884444",
+              borderRadius: 8,
+              padding: 16,
+              marginBottom: 16,
+            }}
+            animate={shake ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}}
+            transition={{ duration: 0.4 }}
+          >
+            <p style={{
+              color: "#ff8888",
+              fontFamily: "Oswald",
+              fontSize: 13,
+              margin: 0,
+              letterSpacing: 1,
+              textAlign: "center",
+            }}>
+              ⚠️ {confirmError}
+            </p>
+          </motion.div>
+        )}
 
         <motion.div
           className="confirm-card"
@@ -171,7 +213,7 @@ export default function ConfirmScreen({ barber, service, date, time, onBack, onC
               type="text"
               placeholder="Digite seu nome completo"
               value={clientName}
-              onChange={(e) => { setClientName(e.target.value); setNameError(false); }}
+              onChange={(e) => { setClientName(e.target.value); setNameError(false); setConfirmError(null); }}
               className={`confirm-name-input ${nameError ? "input-error" : ""}`}
               animate={shake ? { x: [-8, 8, -6, 6, -4, 4, 0] } : {}}
               transition={{ duration: 0.4 }}
